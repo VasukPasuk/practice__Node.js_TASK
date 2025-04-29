@@ -32,7 +32,7 @@ export class PostsService {
   async checkAccessRightsById(postId: string, userId: string) {
     const post = await this.prisma.post.findUnique({where: {id: postId}})
     if (!post) {
-      throw new BadRequestException(`Post with id ${postId} not found.{}`)
+      throw new BadRequestException(`Post with id ${postId} not found.`)
     }
     return userId === post.authorId;
   }
