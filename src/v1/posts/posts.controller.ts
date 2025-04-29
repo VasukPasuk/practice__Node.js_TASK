@@ -1,68 +1,73 @@
-import {Body, Controller, Delete, Get, Param, Post, Put, UseGuards} from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import {PostsService} from './posts.service';
-import {CreatePostDto} from "./posts.dto";
-import {JwtAuthGuard} from "../auth/jwt.auth.guard";
-import {JWTUserDataType, User} from "../users/users.param.decorator";
-import {ApiBearerAuth, ApiOperation} from "@nestjs/swagger";
+import {CreatePostDto} from './posts.dto';
+import {JwtAuthGuard} from '../auth/jwt.auth.guard';
+import {JWTUserDataType, User} from '../users/users.param.decorator';
+import {ApiBearerAuth, ApiOperation, ApiTags} from '@nestjs/swagger';
 
+@ApiTags('Posts')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {
   }
 
-  @ApiOperation({
-    summary: 'Create post operation',
-    description: 'Result of user login: an object with access_token field that contains JWT access token',
-  })
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Post()
+  @ApiOperation({
+    summary: 'Create a post',
+    description: 'Creates a post for the authenticated user',
+  })
   async create(@Body() post: CreatePostDto, @User() user: JWTUserDataType) {
     return this.postsService.createPost({...post, authorId: user.userId});
   }
 
-
-  @ApiOperation({
-    summary: 'Get all posts operation',
-    description: 'Result of user login: array of all posts',
-  })
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Get()
+  @ApiOperation({
+    summary: 'Get all posts',
+    description: 'Returns an array of all posts',
+  })
   async getAll() {
-    return this.postsService.getAllPosts()
+    return this.postsService.getAllPosts();
   }
 
-  @ApiOperation({
-    summary: 'Get post operation',
-    description: 'Result of user login: searched post by id',
-  })
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Get(':id')
-  async getOne(@Param("id") id: string) {
-    return this.postsService.getPostById(id)
+  @ApiOperation({
+    summary: 'Get a single post',
+    description: 'Returns the post with the specified ID',
+  })
+  async getOne(@Param('id') id: string) {
+    return this.postsService.getPostById(id);
   }
 
-  @ApiOperation({
-    summary: 'Update post operation',
-    description: 'Result of user login: updated post',
-  })
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Put(':id')
-  async update(@User() user: JWTUserDataType, @Param("id") id: string, @Body() post: CreatePostDto) {
-    return this.postsService.updatePostById(id, post, user.userId)
+  @ApiOperation({
+    summary: 'Update a post',
+    description: 'Updates the specified post if owned by the authenticated user',
+  })
+  async update(
+    @Param('id') id: string,
+    @Body() post: CreatePostDto,
+    @User() user: JWTUserDataType,
+  ) {
+    return this.postsService.updatePostById(id, post, user.userId);
   }
 
-  @ApiOperation({
-    summary: 'Delete post operation',
-    description: 'Result of user login: deleted post',
-  })
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  async deleteOne(@User() user: JWTUserDataType, @Param("id") id: string) {
-    return this.postsService.deletePostById(id, user.userId)
+  @ApiOperation({
+    summary: 'Delete a post',
+    description: 'Deletes the specified post if owned by the authenticated user',
+  })
+  async deleteOne(@Param('id') id: string, @User() user: JWTUserDataType) {
+    return this.postsService.deletePostById(id, user.userId);
   }
 }
